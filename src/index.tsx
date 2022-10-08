@@ -1,19 +1,40 @@
-import React from 'react';
+import { configureStore, PreloadedState } from '@reduxjs/toolkit';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import { Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { BrowserRouter as Router } from 'react-router-dom';
+import thunk from 'redux-thunk';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
+import rootReducer from './reducer/rootReducer';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+
+const middleware = [thunk];
+
+function setupStore(preloadedState?: PreloadedState<RootState>)
+{
+  return configureStore({
+    reducer: rootReducer,
+    devTools: true,
+    middleware: middleware,
+    preloadedState
+  });
+};
+
+const store = setupStore();
+
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <Router>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </Router>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+export default store;
+export type RootState = ReturnType<typeof rootReducer>;
+export type AppDispatch = typeof store.dispatch;
+export const useAppDispatch: () => AppDispatch = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
